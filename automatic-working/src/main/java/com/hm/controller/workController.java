@@ -25,7 +25,7 @@ import java.util.Map;
 public class workController {
     private final static Integer BUSINESS_DETAILS = 0;
     private final static Integer TENDERING_MATERIAL = 1;
-    private final static String FILE_TEMPLATE_NAME = "成交明细";
+    private final static String FILE_TEMPLATE_NAME = "成交明细.xlsx";
     private final static String FILE_FLAG_NAME = "包号";
     private final static String KEY_ONE = "包号";
     private final static String KEY_TWO = "应答人名称";
@@ -118,63 +118,91 @@ public class workController {
                         if (str.indexOf("定点") != -1) {
                             flag = true;
                         }
-                        //判断是不是包号
+                        //判断是不是包号 定位到表头
                         if (FILE_FLAG_NAME.equals(str)) {
                             //获取综合排序表主键位置
                             //综合排序表默认主键 0 2
                             Integer comprehensiveMapkeyOne = 0;
                             Integer comprehensiveMapkeyTwo = 2;
+                            //取所需数据 如果存在模板字段则取出
+                            //模板字段内容集合
+                            List<String> templContentList = new ArrayList<>();
+                            //模板字段位置集合
+                            List<Integer> templIndexList = new ArrayList<>();
+                            //报名模板字段位置集合
+                            List<Integer> enrolllIndexList = new ArrayList<>();
+                            //报名模板字段内容结合
+                            List<String> enrollContentList = new ArrayList<>();
                             for (int k = 0; k < comprehensiveMap.size(); k++) {
                                 String comprehensiveMapKey = (String) comprehensiveMap.get(k);
                                 if (KEY_ONE.equals(comprehensiveMapKey)) {
-                                    comprehensiveMapkeyOne=k;
+                                    comprehensiveMapkeyOne = k;
                                 }
                                 if (KEY_TWO.equals(comprehensiveMapKey)) {
-                                    comprehensiveMapkeyTwo=k;
+                                    comprehensiveMapkeyTwo = k;
+                                }
+                                //获取模板字段内容及位置
+                                if (keys.contains(comprehensiveMapKey)) {
+                                    templIndexList.add(k);
+                                    templContentList.add(comprehensiveMapKey);
                                 }
                             }
                             //获取所需数据 定点取多条 不是定点取一条
                             if (flag) {
 
                             } else {
-                                //取所需数据 如果存在模板字段则取出
-                                for (int k = 0; k < comprehensiveMap.size(); k++) {
-                                    String comprehensiveMapKey = (String) comprehensiveMap.get(k);
-                                    //获取模板字段 判断存在模板字段 取下一行内容
-                                    if (keys.contains(comprehensiveMapKey)) {
-                                        Map<Integer, Object> comprehensiveAdd = comprehensivesNew.get(j + 1);
-                                        String comprehensiveAddValue = (String) comprehensiveAdd.get(k);
-                                        Map<String, Object> writeMap = new HashMap<>();
-                                        //组装输出map
-                                        writeMap.put(comprehensiveMapKey, comprehensiveAddValue);
-                                        //补充报名信息
-                                        //获取报名信息表头
-                                        Map<Integer, Object> signUpsMap = signUps.get(0);
-                                        //报名表默认主键 0 4
-                                        Integer keyOne = 0;
-                                        Integer keyTwo = 4;
-                                        for (int l = 0; l < signUpsMap.size(); l++) {
-                                            //主键所在位置
-                                            String signUpsMapaStr = (String) signUpsMap.get(l);
-                                            if (KEY_ONE.equals(signUpsMapaStr)) {
-                                                keyOne = l;
-                                            }
-                                            if (KEY_TWO.equals(signUpsMapaStr)) {
-                                                keyTwo = l;
-                                            }
-                                        }
-                                        //查找主键关联信息 从表内容查起
-                                        for (int l = 1; l < signUps.size(); l++) {
-                                            Map<Integer, Object> signUpsMapBody = signUps.get(l);
-                                            String keyOneStr = (String) signUpsMapBody.get(keyOne);
-                                            String keyTwoStr = (String) signUpsMapBody.get(keyTwo);
+                                Map<Integer, Object> comprehensiveAdd = comprehensivesNew.get(j + 1);
+                                //组装输出map
+                                Map<String, Object> writeMap = new HashMap<>();
+                                for (int k = 0; k < templIndexList.size(); k++) {
+                                    Integer index = templIndexList.get(k);
+                                    String key = templContentList.get(index);
+                                    String value = (String) comprehensiveAdd.get(index);
+                                    writeMap.put(key, value);
+                                }
+                                //获取主键所在内容
+                                String keyOneValue = (String) comprehensiveAdd.get(comprehensiveMapkeyOne);
+                                String keyTwoValue = (String) comprehensiveAdd.get(comprehensiveMapkeyTwo);
 
+                                //补充报名信息
+                                //获取报名信息表头
+                                Map<Integer, Object> signUpsMap = signUps.get(1);
+                                //报名表默认主键 0 4
+                                Integer keyOne = 0;
+                                Integer keyTwo = 4;
+                                for (int l = 0; l < signUpsMap.size(); l++) {
+                                    //主键所在位置
+                                    String signUpsMapaStr = (String) signUpsMap.get(l);
+                                    if (KEY_ONE.equals(signUpsMapaStr)) {
+                                        keyOne = l;
+                                    }
+                                    if (KEY_TWO.equals(signUpsMapaStr)) {
+                                        keyTwo = l;
+                                    }
+                                    if (keys.contains(signUpsMapaStr)) {
+                                        enrollContentList.add(signUpsMapaStr);
+                                        enrolllIndexList.add(l);
+                                    }
+                                }
+                                //查找主键关联信息 从表内容查起
+                                for (int l = 2; l < signUps.size(); l++) {
+                                    Map<Integer, Object> signUpsMapBody = signUps.get(l);
+                                    String keyOneStr = (String) signUpsMapBody.get(keyOne);
+                                    String keyTwoStr = (String) signUpsMapBody.get(keyTwo);
+                                    //主键相同则为需要内容
+                                    if(keyOneValue.equals(keyOneStr) && keyTwoValue.equals(keyTwoStr)){
+                                        for (int k = 0; k < enrolllIndexList.size(); k++) {
+                                            Integer index = enrolllIndexList.get(k);
+                                            String key = enrollContentList.get(index);
+                                            String value = (String) signUpsMapBody.get(index);
+                                            writeMap.put(key,value);
                                         }
-                                        //组装输出list
                                         writeList.add(writeMap);
+                                        break;
                                     }
                                 }
                             }
+                            break;
                         } else {
                             continue;
                         }
