@@ -45,7 +45,7 @@ public class workController {
         try {
             Map map = new HashMap<>();
             WordUtil wordUtil = new WordUtil();
-            wordUtil.exportMillCertificateWord(request,response,map,"cai","cailiao.ftl",path);
+            wordUtil.exportMillCertificateWord(request, response, map, "cai", "cailiao.ftl", path);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -60,7 +60,7 @@ public class workController {
     }
 
     @RequestMapping("/excel")
-    public void excelRead(FileVo fileVo) {
+    public void excelRead(FileVo fileVo) throws FileNotFoundException {
         //综合排序
         String comprehensive = fileVo.getComprehensive();
         //报名
@@ -81,7 +81,7 @@ public class workController {
         if (type == BUSINESS_DETAILS) {
             this.businessDetails(comprehensive, signUp);
         } else if (type == TENDERING_MATERIAL) {
-            this.tenderingMaterial();
+            this.tenderingMaterial(comprehensive,signUp);
         }
     }
 
@@ -233,7 +233,63 @@ public class workController {
     }
 
     //招标材料
-    public void tenderingMaterial() {
+    public void tenderingMaterial(String comprehensive, String signUp) throws FileNotFoundException {
+        //组装最后的写出List
+        List<Map<String, Object>> writeList = new ArrayList<>();
+        //获取报名list
+        List<Map<Integer, Object>> signUps = this.readExcel(signUp, 0);
+        for (int i = 0; true; i++) {
+            //设置是否定点标志
+            Boolean flag = false;
+            //动态获取sheet
+            List<Map<Integer, Object>> comprehensivesNew = this.readExcel(comprehensive, i);
+            //不存在数据则结束
+            if (CollectionUtils.isEmpty(comprehensivesNew)) {
+                break;
+            }
+            //遍历综合排序表每个sheet
+            String markName = "";
+            for (int j = 0; j < comprehensivesNew.size(); j++) {
+                //获取每行内容
+                Map<Integer, Object> comprehensiveMap = comprehensivesNew.get(j);
+                //获取每行第一个字段 看是不是定点
+                String str = (String) comprehensiveMap.get(0);
+                if (str.indexOf("定点") != -1) {
+                    flag = true;
+                }
+                //获取分标名称
+                if(str.indexOf("分标名称") != -1){
+                    markName=str;
+                }
+                //获取包号位置
+                if (FILE_FLAG_NAME.equals(str)) {
+                    //综合排序表默认主键 0 2
+                    Integer comprehensiveMapkeyOne = 0;
+                    Integer comprehensiveMapkeyTwo = 2;
+                    //取所需数据 如果存在模板字段则取出
+                    //模板字段内容集合
+                    List<String> templContentList = new ArrayList<>();
+                    //模板字段位置集合
+                    List<Integer> templIndexList = new ArrayList<>();
+                    //报名模板字段位置集合
+                    List<Integer> enrolllIndexList = new ArrayList<>();
+                    //报名模板字段内容结合
+                    List<String> enrollContentList = new ArrayList<>();
+                    //获取主键位置
+                    for (int k = 0; k < comprehensiveMap.size(); k++) {
+                        String comprehensiveMapKey = (String) comprehensiveMap.get(k);
+                        if (KEY_ONE.equals(comprehensiveMapKey)) {
+                            comprehensiveMapkeyOne = k;
+                        }
+                        if (KEY_TWO.equals(comprehensiveMapKey)) {
+                            comprehensiveMapkeyTwo = k;
+                        }
+                    }
+
+                }
+            }
+
+        }
 
     }
 }
