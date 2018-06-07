@@ -18,9 +18,11 @@ public class WordUtil {
     private static Configuration configuration = null;
     //这里注意的是利用WordUtils的类加载器动态获得模板文件的位置
     // private static final String templateFolder = WordUtils.class.getClassLoader().getResource("../../").getPath() + "WEB-INF/templetes/";
+/*
     private static final String templateFolder = WordUtil.class.getClassLoader().getResource("/").getPath()+"/temp/"+"cailiao.ftl";
+*/
 
-    static {
+ /*   static {
         configuration = new Configuration();
         configuration.setDefaultEncoding("utf-8");
         try {
@@ -28,13 +30,13 @@ public class WordUtil {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
+    }*/
 
-    private WordUtil() {
-        throw new AssertionError();
-    }
 
-    public static void exportMillCertificateWord(HttpServletRequest request, HttpServletResponse response, Map map, String title, String ftlFile) throws IOException {
+    public  void exportMillCertificateWord(HttpServletRequest request, HttpServletResponse response, Map map, String title, String ftlFile,String path) throws IOException {
+        configuration = new Configuration(Configuration.VERSION_2_3_0);
+        configuration.setDefaultEncoding("utf-8");
+        configuration.setDirectoryForTemplateLoading(new File(path));
         Template freemarkerTemplate = configuration.getTemplate(ftlFile);
         File file = null;
         InputStream fin = null;
@@ -65,7 +67,7 @@ public class WordUtil {
         }
     }
 
-    private static File createDoc(Map<?, ?> dataMap, Template template) {
+    private  File createDoc(Map<?, ?> dataMap, Template template) {
         String name = "cailiao.doc";
         File f = new File(name);
         Template t = template;

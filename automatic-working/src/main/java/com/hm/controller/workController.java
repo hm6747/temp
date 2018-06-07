@@ -2,6 +2,7 @@ package com.hm.controller;
 
 import com.hm.pojo.FileVo;
 import com.hm.util.excel.ExcelReaderUtil;
+import com.hm.util.excel.WordUtil;
 import com.hm.util.excel.base.BizResult;
 import com.hm.util.excel.common.UploadUtils;
 import org.springframework.stereotype.Controller;
@@ -11,8 +12,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -36,11 +39,16 @@ public class workController {
     }
 
     @RequestMapping("/free")
-    public String free() {
+    public void free(HttpServletRequest request, HttpServletResponse response) {
         UploadUtils uploadUtils = new UploadUtils();
-        String path = uploadUtils.getPath("cailiao.ftl");
-
-        return "cailiao.ftl";
+        String path = uploadUtils.getPath("");
+        try {
+            Map map = new HashMap<>();
+            WordUtil wordUtil = new WordUtil();
+            wordUtil.exportMillCertificateWord(request,response,map,"cai","cailiao.ftl",path);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @RequestMapping("/upload")
