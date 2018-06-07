@@ -35,6 +35,14 @@ public class workController {
         return "index";
     }
 
+    @RequestMapping("/free")
+    public String free() {
+        UploadUtils uploadUtils = new UploadUtils();
+        String path = uploadUtils.getPath("cailiao.ftl");
+
+        return "cailiao.ftl";
+    }
+
     @RequestMapping("/upload")
     @ResponseBody
     public BizResult upload(String fileName, HttpServletRequest request) {
@@ -84,7 +92,6 @@ public class workController {
         try {
             //组装最后的写出List
             List<Map<String, Object>> writeList = new ArrayList<>();
-
             List<Map<Integer, Object>> signUps = this.readExcel(signUp, 0);
             //获取模板
             UploadUtils up = new UploadUtils();
@@ -190,12 +197,12 @@ public class workController {
                                     String keyOneStr = (String) signUpsMapBody.get(keyOne);
                                     String keyTwoStr = (String) signUpsMapBody.get(keyTwo);
                                     //主键相同则为需要内容
-                                    if(keyOneValue.equals(keyOneStr) && keyTwoValue.equals(keyTwoStr)){
+                                    if (keyOneValue.equals(keyOneStr) && keyTwoValue.equals(keyTwoStr)) {
                                         for (int k = 0; k < enrolllIndexList.size(); k++) {
                                             Integer index = enrolllIndexList.get(k);
                                             String key = enrollContentList.get(index);
                                             String value = (String) signUpsMapBody.get(index);
-                                            writeMap.put(key,value);
+                                            writeMap.put(key, value);
                                         }
                                         writeList.add(writeMap);
                                         break;
