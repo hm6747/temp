@@ -94,6 +94,7 @@ public class ExcelReaderUtil {
                 CellStyle cellStyle = row.getCell(j).getCellStyle();
                 //获取背景色
                 short fillForegroundColor = cellStyle.getFillForegroundColor();
+                short fillBackgroundColor = cellStyle.getFillBackgroundColor();
                 if (row.getCell(j) != null) {
                     row.getCell(j).setCellType(Cell.CELL_TYPE_STRING);
                     //获取单元格内容
@@ -110,6 +111,10 @@ public class ExcelReaderUtil {
                         //包号列必要
                         keys.add(j);
                         headFlag = true;
+                    }
+                    if(headFlag){
+                        System.out.println(fillForegroundColor+":"+cellValue);
+                        System.out.println(fillBackgroundColor+":"+cellValue);
                     }
                 }
                 if(headFlag || bodyFlag){
